@@ -9,6 +9,7 @@ var mouse_sensitivity = 0.002
 var actionPressed = false
 
 @onready var raycast := $Camera3D/RayCast3D
+@onready var world := $/root/main/map
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -46,9 +47,14 @@ func _unhandled_input(event):
 func breakBlocks():
 	if raycast.is_colliding():
 		var collider = raycast.get_collider()
-		if collider is GridMap:
+		if collider is StaticBody3D:
 			var collisionPoint = raycast.get_collision_point()
-			collider.set_cell_item(collider.local_to_map(collisionPoint), -1)
+			var particleScene := preload("res://Scenes/player/mining_particles.tscn")
+			var particles := particleScene.instantiate()
+			particles.position = collisionPoint
+			world.add_child(particles)
+			particles.emitting = true
+			world.dig(collisionPoint, 1)
 		
 func doAction():
 	if actionPressed:

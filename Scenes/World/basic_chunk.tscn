@@ -1,14 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://c0imxc6ykf153"]
+[gd_scene load_steps=5 format=3 uid="uid://c0imxc6ykf153"]
 
 [ext_resource type="Shader" path="res://Scenes/World/world.gdshader" id="1_a0kbf"]
+[ext_resource type="Texture2D" uid="uid://cr5i84s3mi8hk" path="res://Assets/Textures/grass.jpg" id="2_u5yfk"]
+[ext_resource type="Texture2D" uid="uid://suu852d0ilq6" path="res://Assets/Textures/rock.png" id="3_pvmub"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fd6ho"]
 render_priority = 0
 shader = ExtResource("1_a0kbf")
-shader_parameter/grass_level = -1.0
-shader_parameter/snow_level = 5.0
-shader_parameter/stone_level = 1.5
-shader_parameter/barren_level = 0.1
+shader_parameter/WallTexScale = 3.0
+shader_parameter/WallColor = Color(1, 1, 1, 1)
+shader_parameter/TopTexScale = 3.0
+shader_parameter/TopColor = Color(0, 0.941176, 0.0784314, 1)
+shader_parameter/BlendValues = Vector4(3, -2, 0, 1)
+shader_parameter/WallTex = ExtResource("3_pvmub")
+shader_parameter/TopTex = ExtResource("2_u5yfk")
 
 [node name="BasicChunk" type="MeshInstance3D"]
 material_override = SubResource("ShaderMaterial_fd6ho")

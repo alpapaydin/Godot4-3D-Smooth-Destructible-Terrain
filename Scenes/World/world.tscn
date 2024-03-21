@@ -9,12 +9,11 @@ sky_material = SubResource("ProceduralSkyMaterial_secnb")
 
 [sub_resource type="Environment" id="Environment_4mpvh"]
 background_mode = 2
-background_energy_multiplier = 2.58
+background_energy_multiplier = 4.45
 sky = SubResource("Sky_avorj")
-sky_custom_fov = 49.7
+sky_rotation = Vector3(0, 0, 3.14159)
 ambient_light_source = 3
-ambient_light_energy = 1.84
-reflected_light_source = 2
+ambient_light_energy = 3.44
 tonemap_mode = 1
 fog_enabled = true
 fog_density = 0.0047
@@ -25,7 +24,7 @@ volumetric_fog_emission = Color(0.721569, 0.721569, 0.721569, 1)
 volumetric_fog_anisotropy = 0.61
 volumetric_fog_length = 85.56
 volumetric_fog_detail_spread = 1.86607
-volumetric_fog_sky_affect = 0.206
+volumetric_fog_sky_affect = 0.106
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_88oay"]
 dof_blur_far_enabled = true

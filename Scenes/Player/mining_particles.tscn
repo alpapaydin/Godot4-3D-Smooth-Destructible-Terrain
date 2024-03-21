@@ -1,0 +1,46 @@
+[gd_scene load_steps=8 format=3 uid="uid://bigb7vopupvwc"]
+
+[sub_resource type="Curve" id="Curve_6ofgi"]
+min_value = 1.0
+max_value = 5.0
+_data = [Vector2(0.0107914, 1), 0.0, 0.0, 0, 0, Vector2(0.971223, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_tstrg"]
+curve_y = SubResource("Curve_6ofgi")
+
+[sub_resource type="Curve" id="Curve_gi6qs"]
+max_value = 3.0
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_oor2y"]
+curve = SubResource("Curve_gi6qs")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_pkbum"]
+emission_shape = 1
+emission_sphere_radius = 0.3
+directional_velocity_min = 1.0
+directional_velocity_max = 2.0
+directional_velocity_curve = SubResource("CurveXYZTexture_tstrg")
+gravity = Vector3(0, -3, 0)
+scale_min = 0.5
+scale_over_velocity_curve = SubResource("CurveTexture_oor2y")
+hue_variation_min = -0.55
+hue_variation_max = 0.52
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0l5a5"]
+albedo_color = Color(0.407843, 0.203922, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_60i7w"]
+material = SubResource("StandardMaterial3D_0l5a5")
+size = Vector3(0.1, 0.1, 0.1)
+
+[node name="GPUParticles3D" type="GPUParticles3D"]
+emitting = false
+amount = 2
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_pkbum")
+draw_pass_1 = SubResource("BoxMesh_60i7w")
