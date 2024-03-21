@@ -1,6 +1,6 @@
 # Godot 4 Simple 3D Smooth Destructible Terrain
 
-A very basic demonstration of procedural terrain generator implemented in Godot. It uses simplex noise and heightmap to generate varied and natural-looking terrain in real time, and allows for digging and modifying the terrain. The world generation is done in around 100 lines of code.
+A very basic demonstration of procedural terrain generator implemented in Godot. It uses simplex noise and heightmap with ArrayMesh to generate varied and natural-looking terrain in real time, and allows for digging and modifying the terrain. The world generation is done in around 100 lines of code.
 
 ![Preview](https://github.com/alpapaydin/Godot4-3D-Smooth-Destructible-Terrain/blob/master/preview.gif?raw=true)
 
