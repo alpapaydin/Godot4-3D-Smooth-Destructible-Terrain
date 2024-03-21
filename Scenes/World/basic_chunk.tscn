@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://c0imxc6ykf153"]
+
+[ext_resource type="Shader" path="res://Scenes/World/world.gdshader" id="1_a0kbf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fd6ho"]
+render_priority = 0
+shader = ExtResource("1_a0kbf")
+shader_parameter/grass_level = -1.0
+shader_parameter/snow_level = 5.0
+shader_parameter/stone_level = 1.5
+shader_parameter/barren_level = 0.1
+
+[node name="BasicChunk" type="MeshInstance3D"]
+material_override = SubResource("ShaderMaterial_fd6ho")
