@@ -49,7 +49,7 @@ func breakBlocks():
 		var collider = raycast.get_collider()
 		if collider is StaticBody3D:
 			var collisionPoint = raycast.get_collision_point()
-			var particleScene := preload("res://Scenes/player/mining_particles.tscn")
+			var particleScene := preload("res://Scenes/Player/mining_particles.tscn")
 			var particles := particleScene.instantiate()
 			particles.position = collisionPoint
 			world.add_child(particles)
