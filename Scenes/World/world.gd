@@ -134,40 +134,54 @@ func _complete_dig():
 
 				
 ## calculates height change with a weighted bias towards center
-func _dig_height_calculation(heights, z: int,x: int,digAmount: float, chunk_pos: Vector3) -> void:
-	chunks_to_regenerate = []
-	_dig_at_point(heights,z,x,digAmount, chunk_pos) 
-	_dig_at_point(heights,z,x+1,digAmount, chunk_pos) 
-	_dig_at_point(heights,z,x-1,digAmount, chunk_pos) 
-	_dig_at_point(heights,z+1,x,digAmount, chunk_pos) 
-	_dig_at_point(heights,z-1,x,digAmount, chunk_pos) 
-	_dig_at_point(heights,z+1,x+1,digAmount, chunk_pos) 
-	_dig_at_point(heights,z-1,x-1,digAmount, chunk_pos) 
-	_dig_at_point(heights,z+1,x-1,digAmount, chunk_pos) 
-	_dig_at_point(heights,z-1,x+1,digAmount, chunk_pos) 
+func _dig_height_calculation(heights: Array, z: int, x: int, digAmount: float, chunk_pos: Vector3) -> void:
+	chunks_to_regenerate.clear()
+	
+	# Modify the height at the center and neighboring points
+	_dig_at_point(heights, z, x, digAmount, chunk_pos)
+	_dig_at_point(heights, z, x + 1, digAmount, chunk_pos)
+	_dig_at_point(heights, z - 1, x, digAmount, chunk_pos)
+	_dig_at_point(heights, z + 1, x, digAmount, chunk_pos)
+	_dig_at_point(heights, z, x - 1, digAmount, chunk_pos)
+	_dig_at_point(heights, z + 1, x + 1, digAmount, chunk_pos)
+	_dig_at_point(heights, z - 1, x - 1, digAmount, chunk_pos)
+	_dig_at_point(heights, z + 1, x - 1, digAmount, chunk_pos)
+	_dig_at_point(heights, z - 1, x + 1, digAmount, chunk_pos)
+
+	# Regenerate the modified chunks
+	for chunk_posi in chunks_to_regenerate:
+		generate_chunk(chunk_posi)
 	
 var chunks_to_regenerate: Array = []
-func _dig_at_point(heights, z: int,x: int,digAmount: float, chunk_pos: Vector3) -> void:
-	var target_height : float = heights[z][x] + digAmount * 3 
-	heights[z][x] = target_height 
-	if z < 1:  # sometimes this shoots terrain into the air instead of levelling it?
-		var chunk = chunk_pos - Vector3(0,0,chunk_size.z)
-		var nearheights = height_map[chunk]
-		nearheights[clamp(64-z,0,64)][x] = target_height   # the error has to be hear but I'm baffled by it.
-		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
-	elif z > chunk_size.z - 1:  
-		var chunk = chunk_pos + Vector3(0,0,chunk_size.z)
-		var nearheights = height_map[chunk]
-		nearheights[clamp(64-z,0,64)][x] = target_height 
-		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
+func _dig_at_point(heights: Array, z: int, x: int, digAmount: float, chunk_pos: Vector3) -> void:
+	var target_height: float = heights[z][x] + digAmount * 3
+	heights[z][x] = target_height
+	
+	# Handle neighboring chunks on the Z-axis
+	if z < 1:
+		var chunk_south = chunk_pos - Vector3(0, 0, chunk_size.z)
+		_modify_neighbor_chunk(chunk_south, clamp(chunk_size.z + z, 0, chunk_size.z), x, target_height)
 
-	if x < 1:  # sometimes this shoots terrain into the air instead of levelling it?
-		var chunk = chunk_pos - Vector3(chunk_size.x,0,0)
-		var nearheights = height_map[chunk]
-		nearheights[z][clamp(64-x,0,64)] = target_height   # this probably has the same error as z axis version above
-		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
-	elif x > chunk_size.x - 1:  
-		var chunk = chunk_pos + Vector3(chunk_size.x,0,0)
-		var nearheights = height_map[chunk]
-		nearheights[z][clamp(64-x,0,64)] = target_height 
-		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
+	elif z > chunk_size.z - 1:
+		var chunk_north = chunk_pos + Vector3(0, 0, chunk_size.z)
+		_modify_neighbor_chunk(chunk_north, clamp(z - chunk_size.z, 0, chunk_size.z), x, target_height)
+	
+	# Handle neighboring chunks on the X-axis
+	if x < 1:
+		var chunk_west = chunk_pos - Vector3(chunk_size.x, 0, 0)
+		_modify_neighbor_chunk(chunk_west, z, clamp(chunk_size.x + x, 0, chunk_size.x), target_height)
+
+	elif x > chunk_size.x - 1:
+		var chunk_east = chunk_pos + Vector3(chunk_size.x, 0, 0)
+		_modify_neighbor_chunk(chunk_east, z, clamp(x - chunk_size.x, 0, chunk_size.x), target_height)
+
+func _modify_neighbor_chunk(chunk_pos: Vector3, z: int, x: int, target_height: float) -> void:
+	if not height_map.has(chunk_pos):
+		height_map[chunk_pos] = generate_heights(chunk_pos)  # Generate chunk heights if missing
+	
+	var near_heights = height_map[chunk_pos]
+	near_heights[z][x] = target_height
+	
+	# Mark the chunk for regeneration if not already scheduled
+	if not chunks_to_regenerate.has(chunk_pos):
+		chunks_to_regenerate.append(chunk_pos)
