@@ -129,7 +129,6 @@ func _complete_dig():
 			if is_digging: dig_amount *= -1
 			_dig_height_calculation(heights, z, x , dig_amount, chunk_pos)
 			generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
-			for i in chunks_to_regenerate:generate_chunk(i)
 		dig_request_amount = 0
 
 				
