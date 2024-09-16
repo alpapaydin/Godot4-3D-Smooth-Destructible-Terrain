@@ -118,28 +118,56 @@ func dig(dig_position: Vector3, amount: float, isDigging: bool = true):
 func _complete_dig():
 	if dig_request_amount > 0:
 		var chunk_pos = (dig_target_position / chunk_size).floor() * chunk_size
+		chunk_pos.y = 0 # ensures chunk is always found no matter height
 		if height_map.has(chunk_pos):
 			var heights = height_map[chunk_pos]
 			var local_pos = (dig_target_position - chunk_pos)
 			var x = int(local_pos.x)
 			var z = int(local_pos.z)
 			var y = int(local_pos.y)
-			if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
-				var dig_amount = dig_request_amount / 15.0
-				if is_digging: dig_amount *= -1
-				_dig_height_calculation(heights, z, x , dig_amount)
-				generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
+			var dig_amount = dig_request_amount / 15.0
+			if is_digging: dig_amount *= -1
+			_dig_height_calculation(heights, z, x , dig_amount, chunk_pos)
+			generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
+			for i in chunks_to_regenerate:generate_chunk(i)
 		dig_request_amount = 0
 
 				
 ## calculates height change with a weighted bias towards center
-func _dig_height_calculation(heights, z: int,x: int,digAmount: float) -> void:
-	heights[z][x] =  heights[z][x] + digAmount * 3 
-	heights[z][x+1] = heights[z][x+1] + digAmount * 2
-	heights[z][x-1] = heights[z][x-1] + digAmount * 2
-	heights[z+1][x] = heights[z+1][x] + digAmount * 2
-	heights[z-1][x] = heights[z-1][x] + digAmount * 2
-	heights[z+1][x+1] = heights[z+1][x+1] + digAmount
-	heights[z-1][x-1] = heights[z-1][x-1] + digAmount
-	heights[z+1][x-1] = heights[z+1][x-1] + digAmount
-	heights[z-1][x+1] = heights[z-1][x+1] + digAmount
+func _dig_height_calculation(heights, z: int,x: int,digAmount: float, chunk_pos: Vector3) -> void:
+	chunks_to_regenerate = []
+	_dig_at_point(heights,z,x,digAmount, chunk_pos) 
+	_dig_at_point(heights,z,x+1,digAmount, chunk_pos) 
+	_dig_at_point(heights,z,x-1,digAmount, chunk_pos) 
+	_dig_at_point(heights,z+1,x,digAmount, chunk_pos) 
+	_dig_at_point(heights,z-1,x,digAmount, chunk_pos) 
+	_dig_at_point(heights,z+1,x+1,digAmount, chunk_pos) 
+	_dig_at_point(heights,z-1,x-1,digAmount, chunk_pos) 
+	_dig_at_point(heights,z+1,x-1,digAmount, chunk_pos) 
+	_dig_at_point(heights,z-1,x+1,digAmount, chunk_pos) 
+	
+var chunks_to_regenerate: Array = []
+func _dig_at_point(heights, z: int,x: int,digAmount: float, chunk_pos: Vector3) -> void:
+	var target_height : float = heights[z][x] + digAmount * 3 
+	heights[z][x] = target_height 
+	if z < 1:  # sometimes this shoots terrain into the air instead of levelling it?
+		var chunk = chunk_pos - Vector3(0,0,chunk_size.z)
+		var nearheights = height_map[chunk]
+		nearheights[clamp(64-z,0,64)][x] = target_height   # the error has to be hear but I'm baffled by it.
+		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
+	elif z > chunk_size.z - 1:  
+		var chunk = chunk_pos + Vector3(0,0,chunk_size.z)
+		var nearheights = height_map[chunk]
+		nearheights[clamp(64-z,0,64)][x] = target_height 
+		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
+
+	if x < 1:  # sometimes this shoots terrain into the air instead of levelling it?
+		var chunk = chunk_pos - Vector3(chunk_size.x,0,0)
+		var nearheights = height_map[chunk]
+		nearheights[z][clamp(64-x,0,64)] = target_height   # this probably has the same error as z axis version above
+		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
+	elif x > chunk_size.x - 1:  
+		var chunk = chunk_pos + Vector3(chunk_size.x,0,0)
+		var nearheights = height_map[chunk]
+		nearheights[z][clamp(64-x,0,64)] = target_height 
+		if not chunks_to_regenerate.has(chunk):chunks_to_regenerate.append(chunk)
