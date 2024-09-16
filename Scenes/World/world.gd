@@ -16,6 +16,7 @@ func _ready():
 func _process(_delta):
 	generate_player_chunks()
 	unload_distant_chunks()
+	_complete_dig()
 
 func setup_noise():
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -102,15 +103,28 @@ func generate_points(heights: Array, chunk_pos: Vector3) -> Array:
 			points.append(Vector3(x,     heights[z + 1][x], z + 1) + chunk_pos)
 	return points
 
-func dig(dig_position: Vector3, amount: float):
-	var chunk_pos = (dig_position / chunk_size).floor() * chunk_size
-	if height_map.has(chunk_pos):
-		var heights = height_map[chunk_pos]
-		var local_pos = (dig_position - chunk_pos)
-		var x = int(local_pos.x)
-		var z = int(local_pos.z)
-		var y = int(local_pos.y)
-		if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
-			heights[z][x] = max(heights[z][x] - amount, -20)
-			height_map[chunk_pos] = heights  # Save the changes to the height map.
-			generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
+# dig_request_amount: the amount to dig, can be summed across multiple physics frames called in dig()
+# and then processed in _complete_dig()
+var dig_request_amount := 0.0
+var dig_target_position: Vector3
+# Whether last action was digging (true) or placing dirt (false)
+var is_digging: bool
+
+func dig(dig_position: Vector3, amount: float, isDigging: bool = true):
+	dig_target_position = dig_position
+	dig_request_amount += amount
+	is_digging = isDigging
+
+func _complete_dig():
+	if dig_request_amount > 0:
+		var chunk_pos = (dig_target_position / chunk_size).floor() * chunk_size
+		if height_map.has(chunk_pos):
+			var heights = height_map[chunk_pos]
+			var local_pos = (dig_target_position - chunk_pos)
+			var x = int(local_pos.x)
+			var z = int(local_pos.z)
+			var y = int(local_pos.y)
+			if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
+				heights[z][x] = max(heights[z][x] - dig_request_amount, -20)
+				height_map[chunk_pos] = heights  # Save the changes to the height map.
+				generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
