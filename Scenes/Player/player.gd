@@ -7,6 +7,10 @@ var sprintSpeed = 25.0
 var jump_speed = 11.0
 var mouse_sensitivity = 0.002
 var actionPressed = false
+var actionCooldown = 0.05
+var altActionCooldown = 0.05
+var actionTimer = 0.0
+var altActionTimer = 0.0
 
 @onready var raycast := $Camera3D/RayCast3D
 @onready var world := $/root/main/map
@@ -21,6 +25,9 @@ func get_input():
 	velocity.z = movement_dir.z * speed
 
 func _physics_process(delta):
+	actionTimer -= delta
+	altActionTimer -= delta
+
 	doAction()
 	doAltAction()
 	velocity.y += -gravity * delta
@@ -58,10 +65,12 @@ func breakBlocks(isDigging: bool):
 			world.dig(collisionPoint, 1, isDigging)
 		
 func doAction():
-	if actionPressed:
+	if actionPressed and actionTimer <= 0:
 		breakBlocks(true)
+		actionTimer = actionCooldown
 
 func doAltAction():
-	if Input.is_action_pressed("alt_action"):
+	if Input.is_action_pressed("alt_action") and altActionTimer <= 0:
 		breakBlocks(false)
+		altActionTimer = altActionCooldown
 		
