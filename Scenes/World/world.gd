@@ -118,17 +118,17 @@ func dig(dig_position: Vector3, amount: float, isDigging: bool = true):
 func _complete_dig():
 	if dig_request_amount > 0:
 		var chunk_pos = (dig_target_position / chunk_size).floor() * chunk_size
+		chunk_pos.y = 0 # ensures chunk is always found no matter height
 		if height_map.has(chunk_pos):
 			var heights = height_map[chunk_pos]
 			var local_pos = (dig_target_position - chunk_pos)
 			var x = int(local_pos.x)
 			var z = int(local_pos.z)
 			var y = int(local_pos.y)
-			if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
-				var dig_amount = dig_request_amount / 15.0
-				if is_digging: dig_amount *= -1
-				_dig_height_calculation(heights, z, x , dig_amount)
-				generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
+			var dig_amount = dig_request_amount / 15.0
+			if is_digging: dig_amount *= -1
+			_dig_height_calculation(heights, z, x , dig_amount)
+			generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
 		dig_request_amount = 0
 
 				
