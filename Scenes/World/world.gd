@@ -111,6 +111,18 @@ func dig(dig_position: Vector3, amount: float):
 		var z = int(local_pos.z)
 		var y = int(local_pos.y)
 		if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
+			_dig_height_calculation(heights, z, x, amount / 15.0)
 			heights[z][x] = max(heights[z][x] - amount, -20)
-			height_map[chunk_pos] = heights  # Save the changes to the height map.
 			generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
+
+## calculates height change with a weighted bias towards center
+func _dig_height_calculation(heights, z: int,x: int,digAmount: float) -> void:
+	heights[z][x] =  heights[z][x] + digAmount * 3 
+	heights[z][x+1] = heights[z][x+1] + digAmount * 2
+	heights[z][x-1] = heights[z][x-1] + digAmount * 2
+	heights[z+1][x] = heights[z+1][x] + digAmount * 2
+	heights[z-1][x] = heights[z-1][x] + digAmount * 2
+	heights[z+1][x+1] = heights[z+1][x+1] + digAmount
+	heights[z-1][x-1] = heights[z-1][x-1] + digAmount
+	heights[z+1][x-1] = heights[z+1][x-1] + digAmount
+	heights[z-1][x+1] = heights[z-1][x+1] + digAmount
