@@ -22,6 +22,7 @@ func get_input():
 
 func _physics_process(delta):
 	doAction()
+	doAltAction()
 	velocity.y += -gravity * delta
 	get_input()
 	move_and_slide()
@@ -44,7 +45,7 @@ func _unhandled_input(event):
 	if event.is_action_pressed("jump") and is_on_floor():
 		velocity.y = jump_speed
 
-func breakBlocks():
+func breakBlocks(isDigging: bool):
 	if raycast.is_colliding():
 		var collider = raycast.get_collider()
 		if collider is StaticBody3D:
@@ -54,8 +55,13 @@ func breakBlocks():
 			particles.position = collisionPoint
 			world.add_child(particles)
 			particles.emitting = true
-			world.dig(collisionPoint, 1)
+			world.dig(collisionPoint, 1, isDigging)
 		
 func doAction():
 	if actionPressed:
-		breakBlocks()
+		breakBlocks(true)
+
+func doAltAction():
+	if Input.is_action_pressed("alt_action"):
+		breakBlocks(false)
+		

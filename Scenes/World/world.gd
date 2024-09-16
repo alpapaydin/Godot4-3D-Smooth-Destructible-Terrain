@@ -125,7 +125,9 @@ func _complete_dig():
 			var z = int(local_pos.z)
 			var y = int(local_pos.y)
 			if y < heights[z][x]:  # Only dig if the y-coordinate of the dig_position is below the current height
-				_dig_height_calculation(heights, z, x , -dig_request_amount / 15.0)
+				var dig_amount = dig_request_amount / 15.0
+				if is_digging: dig_amount *= -1
+				_dig_height_calculation(heights, z, x , dig_amount)
 				generate_chunk(chunk_pos)  # Regenerate the chunk to show the changes.
 		dig_request_amount = 0
 
